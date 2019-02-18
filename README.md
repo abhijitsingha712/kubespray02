@@ -1,16 +1,3 @@
-![Kubernetes Logo](https://raw.githubusercontent.com/kubernetes-sigs/kubespray/master/docs/img/kubernetes-logo.png)
-
-Deploy a Production Ready Kubernetes Cluster
-============================================
-
-If you have questions, join us on the [kubernetes slack](https://kubernetes.slack.com), channel **\#kubespray**.
-You can get your invite [here](http://slack.k8s.io/)
-
--   Can be deployed on **AWS, GCE, Azure, OpenStack, vSphere, Oracle Cloud Infrastructure (Experimental), or Baremetal**
--   **Highly available** cluster
--   **Composable** (Choice of the network plugin for instance)
--   Supports most popular **Linux distributions**
--   **Continuous integration tests**
 
 Quick Start
 -----------
@@ -25,15 +12,31 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
 
 #### Usage
 
+    #Do the prerequisite
+    systemctl stop firewalld
+    systemctl disable firewalld
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g'  /etc/selinux/config
+    swapoff -a
+
+    #install Python3 in for CentOS 7
+    yum -y update
+    yum -y install yum-utils
+    yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+    yum -y install python36u
+    yum -y install python36u-pip
+    echo " alias pip='pip3.6' ">> ~/.bashrc
+    echo " alias python='python3.6' " >> ~/.bashrc 
+    source ~/.bashrc 
+    
     # Install dependencies from ``requirements.txt``
     sudo pip install -r requirements.txt
 
-    # Copy ``inventory/sample`` as ``inventory/mycluster``
-    cp -rfp inventory/sample inventory/mycluster
+    #Change ansible inventory file inventory/mycluster/hosts.ini accordingly 
 
     # Update Ansible inventory file with inventory builder
     declare -a IPS=(10.10.1.3 10.10.1.4 10.10.1.5)
-    CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
+    CONFIG_FILE=inventory/mycluster/hosts.ini 
+    python contrib/inventory_builder/inventory.py ${IPS[@]}
 
     # Review and change parameters under ``inventory/mycluster/group_vars``
     cat inventory/mycluster/group_vars/all/all.yml
@@ -43,7 +46,7 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # The option `-b` is required, as for example writing SSL keys in /etc/,
     # installing packages and interacting with various systemd daemons.
     # Without -b the playbook will fail to run!
-    ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
+    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -u root 
 
 Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
